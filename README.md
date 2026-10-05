@@ -31,8 +31,8 @@ This project is being built from scratch as a learning exercise, with a focus on
 - [x] Basic Ebitengine window
 - [x] Tile-based cave grid
 - [x] Dirt, walls, and empty tiles
-- [ ] Player movement
-- [ ] Digging
+- [x] Player movement
+- [x] Digging
 - [ ] Boulder physics
 - [ ] Diamonds
 - [ ] Enemies
@@ -58,4 +58,8 @@ The project is intentionally being built step by step rather than starting from 
 
 Boulder Dash is an existing commercial game and trademark of its respective rights holders.
 
-This project is an educational remake and is not intended for commercial distribution.
+# This project is an educational remake and is not intended for commercial distribution.
+
+# gdev_c16_boulderdash
+
+Recreating Boulder Dash for the Commodore 16 in Go using Ebitengine, with a focus on tile-based simulation, classic game mechanics, and learning how the original works.
