@@ -39,15 +39,15 @@ type Game struct {
 func newGame() *Game {
 	cave := [][]Tile{
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Dirt, Boulder, Dirt, Dirt, Dirt, Wall},
-		{Wall, Dirt, Boulder, Dirt, Dirt, Dirt, Wall},
-		{Wall, Dirt, Empty, Dirt, Dirt, Dirt, Wall},
-		{Wall, Dirt, Empty, Dirt, Player, Dirt, Wall},
+		{Wall, Dirt, Empty, Boulder, Empty, Dirt, Wall},
+		{Wall, Dirt, Empty, Boulder, Empty, Dirt, Wall},
+		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
+		{Wall, Dirt, Dirt, Dirt, Dirt, Player, Wall},
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
 	}
 	return &Game{
 		cave:    cave,
-		playerX: 4,
+		playerX: 5,
 		playerY: 4,
 	}
 }
@@ -119,12 +119,28 @@ func (g *Game) updateGravity() {
 			if g.tileAt(x, y) != Boulder {
 				continue
 			}
-			if g.tileAt(x, y+1) != Empty {
+			below := g.tileAt(x, y+1)
+
+			if below == Empty {
+				g.setTile(x, y, Empty)
+				g.setTile(x, y+1, Boulder)
+				changed = true
 				continue
 			}
-			g.setTile(x, y, Empty)
-			g.setTile(x, y+1, Boulder)
-			changed = true
+			if below != Boulder {
+				continue
+			}
+			if g.tileAt(x-1, y) == Empty &&
+				g.tileAt(x-1, y+1) == Empty {
+				g.setTile(x, y, Empty)
+				g.setTile(x-1, y+1, Boulder)
+				changed = true
+			} else if g.tileAt(x+1, y) == Empty &&
+				g.tileAt(x+1, y+1) == Empty {
+				g.setTile(x, y, Empty)
+				g.setTile(x+1, y+1, Boulder)
+				changed = true
+			}
 		}
 	}
 	if changed {
