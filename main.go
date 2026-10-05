@@ -25,6 +25,7 @@ const (
 	Wall
 	Player
 	Boulder
+	Diamond
 )
 
 type Game struct {
@@ -33,22 +34,22 @@ type Game struct {
 	playerX int
 	playerY int
 
-	simulationTicks int
+	simulationTicks  int
+	diamondCollected int
+	score            int
 }
 
 func newGame() *Game {
 	cave := [][]Tile{
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Dirt, Empty, Boulder, Empty, Dirt, Wall},
-		{Wall, Dirt, Empty, Boulder, Empty, Dirt, Wall},
-		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Dirt, Dirt, Dirt, Dirt, Player, Wall},
+		{Wall, Dirt, Dirt, Dirt, Dirt, Dirt, Wall},
+		{Wall, Player, Diamond, Empty, Diamond, Dirt, Wall},
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
 	}
 	return &Game{
 		cave:    cave,
-		playerX: 5,
-		playerY: 4,
+		playerX: 1,
+		playerY: 2,
 	}
 }
 
@@ -96,9 +97,15 @@ func (g *Game) movePlayer(dx, dy int) {
 
 		// If the space for player to move is NOT Empty / Dirt, can't move
 		// We already handled the Boulder
-	} else if target != Empty && target != Dirt {
+	} else if target != Empty && target != Dirt && target != Diamond {
 		return
 	}
+
+	if target == Diamond {
+		g.diamondCollected++
+		g.score += 10
+	}
+
 	g.setTile(g.playerX, g.playerY, Empty)
 	g.setTile(newX, newY, Player)
 
@@ -222,6 +229,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					colorRGB(160, 160, 160),
 					false,
 				)
+			case Diamond:
+				vector.FillRect(
+					screen,
+					px,
+					py,
+					tileSize,
+					tileSize,
+					colorRGB(80, 220, 240),
+					false,
+				)
 			}
 		}
 	}
@@ -241,10 +258,13 @@ func (g *Game) printCave() {
 				fmt.Print("|")
 			case Boulder:
 				fmt.Print("O")
+			case Diamond:
+				fmt.Print("D")
 			}
 		}
 		fmt.Println()
 	}
+	fmt.Printf("Diamonds:   %d  Score:  %d\n", g.diamondCollected, g.score)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
