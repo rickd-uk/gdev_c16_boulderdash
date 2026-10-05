@@ -38,16 +38,17 @@ type Game struct {
 
 func NewGame() *Game {
 	cave := [][]Tile{
-		{Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Dirt, Boulder, Dirt, Dirt, Dirt, Dirt, Dirt, Dirt, Wall},
-		{Wall, Dirt, Empty, Empty, Empty, Empty, Empty, Dirt, Dirt, Wall},
-		{Wall, Dirt, Dirt, Dirt, Player, Dirt, Dirt, Dirt, Dirt, Wall},
-		{Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall},
+		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
+		{Wall, Dirt, Boulder, Dirt, Dirt, Dirt, Wall},
+		{Wall, Dirt, Boulder, Dirt, Dirt, Dirt, Wall},
+		{Wall, Dirt, Empty, Dirt, Dirt, Dirt, Wall},
+		{Wall, Dirt, Empty, Dirt, Player, Dirt, Wall},
+		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
 	}
 	return &Game{
 		cave:    cave,
 		playerX: 4,
-		playerY: 3,
+		playerY: 4,
 	}
 }
 
