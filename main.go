@@ -92,6 +92,8 @@ func (g *Game) movePlayer(dx, dy int) {
 }
 
 func (g *Game) updateGravity() {
+	changed := false
+
 	for y := len(g.cave) - 1; y >= 0; y-- {
 		for x := range g.cave[y] {
 			// It must be a Boulder and space below must be empty to
@@ -104,7 +106,12 @@ func (g *Game) updateGravity() {
 			}
 			g.setTile(x, y, Empty)
 			g.setTile(x, y+1, Boulder)
+			changed = true
 		}
+	}
+	if changed {
+		g.PrintCave()
+		fmt.Println()
 	}
 }
 
