@@ -47,17 +47,38 @@ func NewGame() *Game {
 	}
 }
 
+func (g *Game) InBounds(x, y int) bool {
+	return y >= 0 &&
+		y < len(g.cave) &&
+		x >= 0 &&
+		x < len(g.cave[y])
+}
+
+func (g *Game) TileAt(x, y int) Tile {
+	if !g.InBounds(x, y) {
+		return Wall
+	}
+	return g.cave[y][x]
+}
+
+func (g *Game) setTile(x, y int, tile Tile) {
+	if !g.InBounds(x, y) {
+		return
+	}
+	g.cave[y][x] = tile
+}
+
 func (g *Game) movePlayer(dx, dy int) {
 	newX := g.playerX + dx
 	newY := g.playerY + dy
 
-	target := g.cave[newY][newX]
+	target := g.TileAt(newX, newY)
 
 	if target != Empty && target != Dirt {
 		return
 	}
-	g.cave[g.playerY][g.playerX] = Empty
-	g.cave[newY][newX] = Player
+	g.setTile(g.playerX, g.playerY, Empty)
+	g.setTile(newX, newY, Player)
 
 	g.playerX = newX
 	g.playerY = newY
