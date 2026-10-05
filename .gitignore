@@ -1,0 +1,24 @@
+# Build output directories
+/bin/
+/dist/
+/build/
+
+# Compiled executable (replace with your app's name)
+/mygame
+/mygame.exe
+
+# Go test binaries and coverage
+*.test
+*.test.exe
+coverage.out
+coverage.html
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Editor temporary files
+*.swp
+*.swo
+*~
