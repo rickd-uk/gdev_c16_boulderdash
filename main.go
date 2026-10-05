@@ -42,14 +42,16 @@ type Game struct {
 func newGame() *Game {
 	cave := [][]Tile{
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Dirt, Dirt, Dirt, Dirt, Dirt, Wall},
-		{Wall, Player, Diamond, Empty, Diamond, Dirt, Wall},
+		{Wall, Empty, Diamond, Dirt, Diamond, Dirt, Wall},
+		{Wall, Empty, Boulder, Dirt, Empty, Dirt, Wall},
+		{Wall, Wall, Wall, Wall, Empty, Wall, Wall},
+		{Wall, Player, Empty, Empty, Empty, Dirt, Wall},
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
 	}
 	return &Game{
 		cave:    cave,
 		playerX: 1,
-		playerY: 2,
+		playerY: 4,
 	}
 }
 
@@ -121,31 +123,34 @@ func (g *Game) updateGravity() {
 
 	for y := len(g.cave) - 1; y >= 0; y-- {
 		for x := range g.cave[y] {
-			// It must be a Boulder and space below must be empty to
-			// for Boulder to drop down into it
-			if g.tileAt(x, y) != Boulder {
+			// It must be a Boulder/Diamond and space below must be empty to
+			// for Boulder/Diamond to drop down into it
+			tile := g.tileAt(x, y)
+
+			if tile != Boulder && tile != Diamond {
 				continue
 			}
 			below := g.tileAt(x, y+1)
 
 			if below == Empty {
 				g.setTile(x, y, Empty)
-				g.setTile(x, y+1, Boulder)
+				g.setTile(x, y+1, tile)
 				changed = true
 				continue
 			}
-			if below != Boulder {
+			// both boulders & diamonds support rolling
+			if below != Boulder && below != Diamond {
 				continue
 			}
 			if g.tileAt(x-1, y) == Empty &&
 				g.tileAt(x-1, y+1) == Empty {
 				g.setTile(x, y, Empty)
-				g.setTile(x-1, y+1, Boulder)
+				g.setTile(x-1, y+1, tile)
 				changed = true
 			} else if g.tileAt(x+1, y) == Empty &&
 				g.tileAt(x+1, y+1) == Empty {
 				g.setTile(x, y, Empty)
-				g.setTile(x+1, y+1, Boulder)
+				g.setTile(x+1, y+1, tile)
 				changed = true
 			}
 		}
