@@ -36,7 +36,7 @@ type Game struct {
 	simulationTicks int
 }
 
-func NewGame() *Game {
+func newGame() *Game {
 	cave := [][]Tile{
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
 		{Wall, Dirt, Boulder, Dirt, Dirt, Dirt, Wall},
@@ -52,22 +52,22 @@ func NewGame() *Game {
 	}
 }
 
-func (g *Game) InBounds(x, y int) bool {
+func (g *Game) inBounds(x, y int) bool {
 	return y >= 0 &&
 		y < len(g.cave) &&
 		x >= 0 &&
 		x < len(g.cave[y])
 }
 
-func (g *Game) TileAt(x, y int) Tile {
-	if !g.InBounds(x, y) {
+func (g *Game) tileAt(x, y int) Tile {
+	if !g.inBounds(x, y) {
 		return Wall
 	}
 	return g.cave[y][x]
 }
 
 func (g *Game) setTile(x, y int, tile Tile) {
-	if !g.InBounds(x, y) {
+	if !g.inBounds(x, y) {
 		return
 	}
 	g.cave[y][x] = tile
@@ -77,9 +77,26 @@ func (g *Game) movePlayer(dx, dy int) {
 	newX := g.playerX + dx
 	newY := g.playerY + dy
 
-	target := g.TileAt(newX, newY)
+	target := g.tileAt(newX, newY)
 
-	if target != Empty && target != Dirt {
+	if target == Boulder {
+		// allow horizontal pushing
+		if dy != 0 {
+			return
+		}
+		beyondX := newX + dx
+		beyondY := newY
+
+		// if space to push boulder into is not empty you cannot push
+		if g.tileAt(beyondX, beyondY) != Empty {
+			return
+		}
+		g.setTile(beyondX, beyondY, Boulder)
+		g.setTile(newX, newY, Empty)
+
+		// If the space for player to move is NOT Empty / Dirt, can't move
+		// We already handled the Boulder
+	} else if target != Empty && target != Dirt {
 		return
 	}
 	g.setTile(g.playerX, g.playerY, Empty)
@@ -88,7 +105,7 @@ func (g *Game) movePlayer(dx, dy int) {
 	g.playerX = newX
 	g.playerY = newY
 
-	g.PrintCave()
+	g.printCave()
 	fmt.Println()
 }
 
@@ -99,10 +116,10 @@ func (g *Game) updateGravity() {
 		for x := range g.cave[y] {
 			// It must be a Boulder and space below must be empty to
 			// for Boulder to drop down into it
-			if g.TileAt(x, y) != Boulder {
+			if g.tileAt(x, y) != Boulder {
 				continue
 			}
-			if g.TileAt(x, y+1) != Empty {
+			if g.tileAt(x, y+1) != Empty {
 				continue
 			}
 			g.setTile(x, y, Empty)
@@ -111,7 +128,7 @@ func (g *Game) updateGravity() {
 		}
 	}
 	if changed {
-		g.PrintCave()
+		g.printCave()
 		fmt.Println()
 	}
 }
@@ -194,7 +211,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (g *Game) PrintCave() {
+func (g *Game) printCave() {
 	for _, row := range g.cave {
 		for _, tile := range row {
 			switch tile {
@@ -231,8 +248,8 @@ func main() {
 	ebiten.SetWindowSize(960, 600)
 	ebiten.SetWindowTitle("Boulder Dash")
 
-	game := NewGame()
-	game.PrintCave()
+	game := newGame()
+	game.printCave()
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
