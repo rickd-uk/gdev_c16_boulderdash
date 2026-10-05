@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	screenWidth  = 320
-	screenHeight = 200
-	tileSize     = 16
+	screenWidth        = 320
+	screenHeight       = 200
+	tileSize           = 16
+	simulationInterval = 12
 )
 
 type Tile uint8
@@ -23,6 +24,7 @@ const (
 	Dirt
 	Wall
 	Player
+	Boulder
 )
 
 type Game struct {
@@ -30,12 +32,14 @@ type Game struct {
 
 	playerX int
 	playerY int
+
+	simulationTicks int
 }
 
 func NewGame() *Game {
 	cave := [][]Tile{
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Dirt, Dirt, Dirt, Dirt, Dirt, Dirt, Dirt, Dirt, Wall},
+		{Wall, Dirt, Boulder, Dirt, Dirt, Dirt, Dirt, Dirt, Dirt, Wall},
 		{Wall, Dirt, Empty, Empty, Empty, Empty, Empty, Dirt, Dirt, Wall},
 		{Wall, Dirt, Dirt, Dirt, Player, Dirt, Dirt, Dirt, Dirt, Wall},
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall},
@@ -87,6 +91,23 @@ func (g *Game) movePlayer(dx, dy int) {
 	fmt.Println()
 }
 
+func (g *Game) updateGravity() {
+	for y := len(g.cave) - 1; y >= 0; y-- {
+		for x := range g.cave[y] {
+			// It must be a Boulder and space below must be empty to
+			// for Boulder to drop down into it
+			if g.TileAt(x, y) != Boulder {
+				continue
+			}
+			if g.TileAt(x, y+1) != Empty {
+				continue
+			}
+			g.setTile(x, y, Empty)
+			g.setTile(x, y+1, Boulder)
+		}
+	}
+}
+
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) {
 		g.movePlayer(-1, 0)
@@ -101,6 +122,13 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) {
 		g.movePlayer(0, 1)
+	}
+
+	g.simulationTicks++
+
+	if g.simulationTicks >= simulationInterval {
+		g.simulationTicks = 0
+		g.updateGravity()
 	}
 
 	return nil
@@ -143,6 +171,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					colorRGB(240, 220, 80),
 					false,
 				)
+			case Boulder:
+				vector.FillRect(
+					screen,
+					px,
+					py,
+					tileSize,
+					tileSize,
+					colorRGB(160, 160, 160),
+					false,
+				)
 			}
 		}
 	}
@@ -160,6 +198,8 @@ func (g *Game) PrintCave() {
 				fmt.Print("*")
 			case Player:
 				fmt.Print("|")
+			case Boulder:
+				fmt.Print("O")
 			}
 		}
 		fmt.Println()
