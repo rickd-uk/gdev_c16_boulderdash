@@ -26,6 +26,8 @@ const (
 	Player
 	Boulder
 	Diamond
+	FallingBoulder
+	FallingDiamond
 )
 
 type Game struct {
@@ -42,7 +44,7 @@ type Game struct {
 func newGame() *Game {
 	cave := [][]Tile{
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Empty, Diamond, Dirt, Diamond, Dirt, Wall},
+		{Wall, Empty, Diamond, Dirt, FallingDiamond, Dirt, Wall},
 		{Wall, Empty, Boulder, Dirt, Empty, Dirt, Wall},
 		{Wall, Wall, Wall, Wall, Empty, Wall, Wall},
 		{Wall, Player, Empty, Empty, Empty, Dirt, Wall},
@@ -224,7 +226,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					colorRGB(240, 220, 80),
 					false,
 				)
-			case Boulder:
+			case Boulder, FallingBoulder:
 				vector.FillRect(
 					screen,
 					px,
@@ -234,7 +236,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					colorRGB(160, 160, 160),
 					false,
 				)
-			case Diamond:
+			case Diamond, FallingDiamond:
 				vector.FillRect(
 					screen,
 					px,
@@ -263,8 +265,12 @@ func (g *Game) printCave() {
 				fmt.Print("|")
 			case Boulder:
 				fmt.Print("O")
+			case FallingBoulder:
+				fmt.Print("o")
 			case Diamond:
 				fmt.Print("D")
+			case FallingDiamond:
+				fmt.Print("d")
 			}
 		}
 		fmt.Println()
