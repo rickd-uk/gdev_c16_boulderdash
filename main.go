@@ -39,16 +39,17 @@ type Game struct {
 	simulationTicks  int
 	diamondCollected int
 	score            int
+	playerDead       bool
 }
 
 func newGame() *Game {
 	cave := [][]Tile{
-		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Empty, Diamond, Dirt, Diamond, Dirt, Wall},
-		{Wall, Empty, Boulder, Dirt, Empty, Dirt, Wall},
-		{Wall, Wall, Wall, Wall, Empty, Wall, Wall},
-		{Wall, Player, Empty, Empty, Empty, Dirt, Wall},
-		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
+		{Wall, Wall, Wall, Wall, Wall},
+		{Wall, Boulder, Empty, Empty, Wall},
+		{Wall, Empty, Empty, Empty, Wall},
+		{Wall, Empty, Empty, Empty, Wall},
+		{Wall, Player, Empty, Empty, Wall},
+		{Wall, Wall, Wall, Wall, Wall},
 	}
 	return &Game{
 		cave:    cave,
@@ -159,6 +160,13 @@ func (g *Game) updateGravity() {
 			}
 			below := g.tileAt(x, y+1)
 
+			if below == Player &&
+				(tile == FallingBoulder || tile == FallingDiamond) {
+				g.playerDead = true
+				fmt.Println("You're crushed!")
+				return
+			}
+
 			// empty space to fall into
 			if below == Empty {
 				g.setTile(x, y, Empty)
@@ -199,6 +207,9 @@ func (g *Game) updateGravity() {
 }
 
 func (g *Game) Update() error {
+	if g.playerDead {
+		return nil
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) {
 		g.movePlayer(-1, 0)
 	}
