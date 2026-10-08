@@ -44,7 +44,7 @@ type Game struct {
 func newGame() *Game {
 	cave := [][]Tile{
 		{Wall, Wall, Wall, Wall, Wall, Wall, Wall},
-		{Wall, Empty, Diamond, Dirt, FallingDiamond, Dirt, Wall},
+		{Wall, Empty, Diamond, Dirt, Diamond, Dirt, Wall},
 		{Wall, Empty, Boulder, Dirt, Empty, Dirt, Wall},
 		{Wall, Wall, Wall, Wall, Empty, Wall, Wall},
 		{Wall, Player, Empty, Empty, Empty, Dirt, Wall},
@@ -78,7 +78,7 @@ func (g *Game) setTile(x, y int, tile Tile) {
 	g.cave[y][x] = tile
 }
 
-func fallingTiles(tile Tile) Tile {
+func fallingTile(tile Tile) Tile {
 
 	switch tile {
 	case Boulder:
@@ -124,11 +124,12 @@ func (g *Game) movePlayer(dx, dy int) {
 
 		// If the space for player to move is NOT Empty / Dirt, can't move
 		// We already handled the Boulder
-	} else if target != Empty && target != Dirt && target != Diamond {
+	} else if target != Empty && target != Dirt && target != Diamond &&
+		target != FallingDiamond {
 		return
 	}
 
-	if target == Diamond {
+	if target == Diamond || target == FallingDiamond {
 		g.diamondCollected++
 		g.score += 10
 	}
@@ -151,31 +152,42 @@ func (g *Game) updateGravity() {
 			// It must be a Boulder/Diamond and space below must be empty to
 			// for Boulder/Diamond to drop down into it
 			tile := g.tileAt(x, y)
+			stationary := stationaryTile(tile)
 
-			if tile != Boulder && tile != Diamond {
+			if stationary != Boulder && stationary != Diamond {
 				continue
 			}
 			below := g.tileAt(x, y+1)
 
+			// empty space to fall into
 			if below == Empty {
 				g.setTile(x, y, Empty)
-				g.setTile(x, y+1, tile)
+				g.setTile(x, y+1, fallingTile(tile))
 				changed = true
 				continue
 			}
-			// both boulders & diamonds support rolling
-			if below != Boulder && below != Diamond {
-				continue
+			support := stationaryTile(below)
+
+			if support == Boulder || support == Diamond {
+				if g.tileAt(x-1, y) == Empty &&
+					g.tileAt(x-1, y+1) == Empty {
+					g.setTile(x, y, Empty)
+					g.setTile(x-1, y+1, fallingTile(tile))
+					changed = true
+					continue
+				}
+				if g.tileAt(x+1, y) == Empty &&
+					g.tileAt(x+1, y+1) == Empty {
+					g.setTile(x, y, Empty)
+					g.setTile(x+1, y+1, fallingTile(tile))
+					changed = true
+					continue
+				}
 			}
-			if g.tileAt(x-1, y) == Empty &&
-				g.tileAt(x-1, y+1) == Empty {
-				g.setTile(x, y, Empty)
-				g.setTile(x-1, y+1, tile)
-				changed = true
-			} else if g.tileAt(x+1, y) == Empty &&
-				g.tileAt(x+1, y+1) == Empty {
-				g.setTile(x, y, Empty)
-				g.setTile(x+1, y+1, tile)
+
+			// no movement was possible - settle the object
+			if tile != stationary {
+				g.setTile(x, y, stationary)
 				changed = true
 			}
 		}
