@@ -78,6 +78,29 @@ func (g *Game) setTile(x, y int, tile Tile) {
 	g.cave[y][x] = tile
 }
 
+func fallingTiles(tile Tile) Tile {
+
+	switch tile {
+	case Boulder:
+		return FallingBoulder
+	case Diamond:
+		return FallingDiamond
+	default:
+		return tile
+	}
+}
+
+func stationaryTile(tile Tile) Tile {
+	switch tile {
+	case FallingBoulder:
+		return Boulder
+	case FallingDiamond:
+		return Diamond
+	default:
+		return tile
+	}
+}
+
 func (g *Game) movePlayer(dx, dy int) {
 	newX := g.playerX + dx
 	newY := g.playerY + dy
